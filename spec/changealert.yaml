@@ -1,0 +1,9 @@
+from_address: <%= @from_address %>
+to_address: <%= @to_address %>
+smtp_server: <%= @smtp_server %>
+smtp_domain: <%= @smtp_domain %>
+smtp_port: <%= @smtp_port %>
+hostnameparts:
+  - pro
+  - foo.example.com
+  

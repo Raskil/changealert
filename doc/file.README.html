@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.9.20
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="puppet_class_list_link"
+        href="puppet_class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'>
+<h1 id="label-changealert">changealert</h1>
+
+<h4 id="label-Table+of+Contents">Table of Contents</h4>
+<ol><li>
+<p><a href="#label-Description">Description</a></p>
+</li><li>
+<p><a href="#label-Setup">Setup - The basics of getting started with changealert</a></p>
+<ul><li>
+<p><a href="#label-What+changealert+affects">What changealert affects</a></p>
+</li><li>
+<p><a href="#label-Setup+requirements">Setup requirements</a></p>
+</li><li>
+<p><a href="#label-Beginning+with+changealert">Beginning with changealert</a></p>
+</li></ul>
+</li><li>
+<p><a href="#label-Usage">Usage - Configuration options and additional
+functionality</a></p>
+</li><li>
+<p><a href="#label-Reference">Reference - An under-the-hood peek at what the module
+is doing and how</a></p>
+</li><li>
+<p><a href="#label-Limitations">Limitations - OS compatibility, etc.</a></p>
+</li><li>
+<p><a href="#label-Development">Development - Guide for contributing to the
+module</a></p>
+</li></ol>
+
+<h2 id="label-Description">Description</h2>
+
+<p>The Module delivers and configures a custom report Processor that is able
+to deliver e-Mail about Puppet agent runs that did changes or failed. It
+has been tested with Puppet Enterprise 2017.2.4 till 2019.2.0 but should
+work with older and newer releases as well. If yxou use Open source, you
+need to make sure that the ini_setting is handled correctly that is
+declared in this modules init.pp and does not collide with something else.</p>
+
+<p>The report processor sends reports based on the hostname of the agent
+generating the report and the module parameter hostnameparts. The basic
+logic is the following: The report processor takes every string inside of
+hostnameparts array and sees if that string is included in the hostname of
+the report. If not, there is no report send. If yes, then a report is send
+if the following conditions are met: * The puppet run generating the report
+has changed any resources on the system. A list of changed resources and
+properties is attached to the mail. * The puppet run generating the report
+has failed on the system. A list of failed resources is attached to the
+mail if possible. * The puppet run had a failed catalog compilation, but
+was running ok on a cached catalog.</p>
+
+<h2 id="label-Setup">Setup</h2>
+
+<h3 id="label-What+changealert+affects">What changealert affects</h3>
+
+<p>The following ressources are affacted: * Custom Report Processor. This
+module comes with the changealrt custom report processor. * Reports setting
+in master section of puppet.conf. The module inserts its own report
+processor into the reports ini setting in puppet.conf. This is done via the
+ini_subsetting module of pe. So it will happliy coexist with other
+subsettings/report processor. * pe-puppetmaster service. If the above
+reports ini setting is changed, the pe-puppetmaster deamon is restarted. *
+The file changealert.yaml in puppets confdir is created and managed. This
+file is used to customize the report processor.</p>
+
+<p><strong>Waring</strong> Report Processors are not environment safe. So
+don&#39;t install the module into your environments. See <a
+href="#label-Setup">Setup</a> section for more details.</p>
+
+<h3 id="label-Setup+Requirements">Setup Requirements</h3>
+
+<p>For this module to work, your pe-puppetserver needs the ruby mail gem
+installed. Install it via this command: <code>bash puppetserver gem install
+mail </code></p>
+
+<h3 id="label-Beginning+with+changealert">Beginning with changealert</h3>
+
+<p><strong>Waring</strong> Report Processors are not environment safe. So
+don&#39;t install the module into your environments. Don&#39;t use means
+like code-manager or r10k to deploy the module. If you do not adhere to
+this, you&#39;ll get strange results.</p>
+
+<p>To get the module up and running, you need to install the module on your
+master somewhere in the $modulepath. You can view your modulepath like
+this: <code>bash puppet config print modulepath
+#/etc/puppetlabs/code/environments/production/modules:/etc/puppetlabs/code/environments/production/site:/etc/puppetlabs/code/modules:/opt/puppetlabs/puppet/modules
+</code></p>
+
+<p>Usually “/opt/puppetlabs/puppet/modules” is a pretty good location for a
+globally active module that can only be installed once. So here is what you
+need to do on your master: <code>bash # Setup root to use the same ssh key
+to connect to Bitbucket as user pe-puppet does. echo -e &quot;Host
+foo.bar.com \n  IdentityFile
+/opt/puppetlabs/server/data/puppetserver/.ssh/id_rsa&quot; &gt;&gt;
+~/.ssh/config chmod 600 ~/.ssh/config # Clone the module and restart
+puppetserver cd /opt/puppetlabs/puppet/modules  git clone
+ssh://git@github.com:Raskil/changealert.git systemctl restart
+pe-puppetserver </code></p>
+
+<p>This should install the module for you.</p>
+
+<h2 id="label-Usage">Usage</h2>
+
+<p>There are several methods to use this module. I found it easiest to be used
+via the Puppet console.</p>
+
+<h3 id="label-Using+it+via+Puppet+Console">Using it via Puppet Console</h3>
+
+<p>Open your Puppet console and navigate to Nodes-&gt;Classification. Find the
+group “PE Infrastructure”-&gt;“PE Master” and click on it. Click on the
+pane “Classes”. In the text box “Add new class” type changealert and click
+on the button “add class”.</p>
+
+<p>Now find the class changealert in the list of classes and configure every
+parameter that it has. They are all mandatory! See puppet-strings
+documentation in the docs folder for details about the parameters. Here are
+some examples:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_from_address'>from_address</span>  <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>puppetmaster@example.com</span><span class='tstring_end'>&quot;</span></span>
+<span class='id identifier rubyid_hostnameparts'>hostnameparts</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>pro</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>foobarsystem.example.com</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>
+<span class='id identifier rubyid_smtp_domain'>smtp_domain</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>example.com</span><span class='tstring_end'>&quot;</span></span>
+<span class='id identifier rubyid_smtp_port'>smtp_port</span>     <span class='op'>=</span> <span class='int'>25</span>
+<span class='id identifier rubyid_smtp_server'>smtp_server</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>172.17.8.10</span><span class='tstring_end'>&quot;</span></span>
+<span class='id identifier rubyid_to_address'>to_address</span>    <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>yourname@example.com, youtechmail@example.com</span><span class='tstring_end'>&quot;</span></span>
+</code></pre>
+
+<h3 id="label-Using+it+via+Hiera-2C+Puppetcode-2C+etc.">Using it via Hiera, Puppetcode, etc.</h3>
+
+<p>You could alternatively set the parameter via Hiera as well. Just set them
+like every other class parameter. But please bear in mind that console
+parameters have precedence over parameters from hiera. So it is wise to
+configure them in one location only.</p>
+
+<p>If you dont apply the class to your Pupept Master via the Console, then you
+need to apply it via different means. All you need to do is include/contain
+the changealert class and set every parameter that it has. Please make sure
+that this Class is only applied on your Puppet master.</p>
+
+<h3 id="label-Updating+the+Module">Updating the Module</h3>
+
+<p>To get to the latest release, do the following on your master: <code>bash
+cd /opt/puppetlabs/puppet/modules/changealert git pull systemctl restart
+pe-puppetserver </code></p>
+
+<h2 id="label-Reference">Reference</h2>
+
+<p>See puppet-strings documentation in docs folder.</p>
+
+<h2 id="label-Limitations">Limitations</h2>
+
+<p>As already pointed out, report processor are not environment safe. Keep
+that in mind.</p>
+</div></div>
+
+      <div id="footer">
+     Generated by <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>.
+</div>
+
+    </div>
+  </body>
+</html>

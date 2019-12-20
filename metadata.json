@@ -1,0 +1,16 @@
+{
+  "name": "raskil-changealrt",
+  "author": "raskil",
+  "summary": "Custom Report Processor to send e-Mails for changed Systems with summary of changed ressources",
+  "license": "CC-BY-4.0",
+  "source": "ssh://git@github.com:Raskil/changealert.git",
+  "project_page": "https://github.com/Raskil/changealert",
+  "issues_url": "https://github.com/Raskil/changealert/issues",
+  "dependencies": [
+    {
+      "name": "puppetlabs/inifile",
+      "version_requirement": ">= 2.0.0 < 5.0.0"
+    }
+  ],
+  "version": "0.1.13"
+}
